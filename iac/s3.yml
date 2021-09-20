@@ -1,6 +1,8 @@
 Resources:
   PhotoBuckets:
     Type: AWS::S3::Bucket
+    Properties:
+      BucketName: photo-sync-trashcanmonster8
       Tags:
         - Name: Project
           Value: photo-sync
