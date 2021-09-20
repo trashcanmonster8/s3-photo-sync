@@ -1,0 +1,6 @@
+Resources:
+  PhotoBuckets:
+    Type: AWS::S3::Bucket
+      Tags:
+        - Name: Project
+          Value: photo-sync
