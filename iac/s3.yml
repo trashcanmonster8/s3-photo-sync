@@ -4,5 +4,5 @@ Resources:
     Properties:
       BucketName: photo-sync-trashcanmonster8
       Tags:
-        - Name: Project
+        - Key: Project
           Value: photo-sync
