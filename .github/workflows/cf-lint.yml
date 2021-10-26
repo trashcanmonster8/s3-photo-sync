@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'iac/**.yml'
+  workflow_dispatch:
 
 jobs:
   cloudformation-linter:
