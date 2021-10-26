@@ -3,7 +3,7 @@ name: Lint CloudFormation Templates
 on:
   push:
     paths:
-      - 'iac/**.yml'
+      - 'iac/*.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,4 +20,4 @@ jobs:
       - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
           cfn-lint --version
-          cfn-lint cfn-lint iac/*.yaml
+          cfn-lint cfn-lint iac/*.yml
