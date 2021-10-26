@@ -6,3 +6,10 @@ Resources:
       Tags:
         - Key: Project
           Value: photo-sync
+  PhotoBucketsReduced:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: photo-sync-trashcanmonster8-reduced
+      Tags:
+        - Key: Project
+          Value: photo-sync
