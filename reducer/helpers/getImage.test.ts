@@ -1,19 +1,23 @@
-import { GetObjectOutput, S3Client } from "@aws-sdk/client-s3";
-import { strictEqual } from "assert";
+import {
+  GetObjectCommand,
+  GetObjectCommandInput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { deepStrictEqual, strictEqual } from "assert";
 import { stub, SinonStub } from "sinon";
-import { Readable } from "stream";
 import { getImage } from "./getImage";
 
 describe("getImage", () => {
   it("returns image buffer", async () => {
     const client: S3Client = new S3Client({});
-    const bucketName = "testName";
-    const objectKey = "testKey";
-    const getObjectStub: SinonStub = stub(client, "send");
-    const result: GetObjectOutput = {
-      Body: new Readable(),
+    const params: GetObjectCommandInput = {
+      Bucket: "testBucket",
+      Key: "testKey",
     };
-    getObjectStub.resolves(result);
-    strictEqual(await getImage(client, bucketName, objectKey), result.Body);
+    const sendStub: SinonStub = stub(client, "send");
+    sendStub.resolves({});
+    await getImage(client, String(params.Bucket), String(params.Key));
+    const command: GetObjectCommand = sendStub.args[0][0];
+    deepStrictEqual(command.input, params);
   });
 });

@@ -4,6 +4,7 @@
   "description": "Lambda for reducing image size",
   "main": "index.js",
   "scripts": {
+    "format": "npm run lint:fix && npm run prettier:fix",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier -c .",
