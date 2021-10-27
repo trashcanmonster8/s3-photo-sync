@@ -14,7 +14,5 @@ export const getImage = async (
     Bucket: bucket,
     Key: key,
   };
-  return await client.send(
-    new GetObjectCommand(params)
-  );
+  return await client.send(new GetObjectCommand(params));
 };

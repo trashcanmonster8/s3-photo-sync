@@ -3,7 +3,7 @@ import {
   GetObjectCommandInput,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { deepStrictEqual, strictEqual } from "assert";
+import { deepStrictEqual } from "assert";
 import { stub, SinonStub } from "sinon";
 import { getImage } from "./getImage";
 
