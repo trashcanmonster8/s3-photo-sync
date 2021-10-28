@@ -3,6 +3,13 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: photo-sync-trashcanmonster8-lambda-code
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveOldVersions
+            NoncurrentVersionExpirationInDays: 1
+            Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
       Tags:
         - Key: Project
           Value: photo-sync

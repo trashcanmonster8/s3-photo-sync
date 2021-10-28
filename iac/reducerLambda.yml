@@ -2,6 +2,8 @@ Parameters:
   BucketName:
     Type: String
     Default: photo-sync-trashcanmonster8
+  Version:
+    Type: String
 Resources:
   PhotoBuckets:
     Type: AWS::S3::Bucket
@@ -56,6 +58,7 @@ Resources:
       Code:
         S3Bucket: photo-sync-trashcanmonster8-lambda-code
         S3Key: function.zip
+        S3ObjectVersion: !Ref Version
       Description: Reduces image size for future viewing
       FunctionName: reduceImage
       Role: !GetAtt ReductionLambdaRole.Arn
