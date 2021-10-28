@@ -54,8 +54,12 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Code:
-        S3Bucket: photo-sync-trashcanmonster8-lambda-code
+        S3Bucket: !Ref BucketName
         S3Key: function.zip
+        ZipFile: |
+          export.handler = () => {
+            print("hello")
+          }
       Description: Reduces image size for future viewing
       FunctionName: reduceImage
       Role: !GetAtt ReductionLambdaRole.Arn
