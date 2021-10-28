@@ -32,7 +32,7 @@ jobs:
           aws-region: us-east-2
       - id: upload
         run: |
-          version=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text)
+          aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text >> $version
           echo "::set-output name=version::$version"
     outputs:
       version: ${{ steps.upload.outputs.version }}
