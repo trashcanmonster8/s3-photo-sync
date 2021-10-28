@@ -2,7 +2,7 @@ name: Reducer Checks
 on:
   push:
     branches-ignore: [ main ]
-    paths: [ reducer/**/* ]
+    paths: [ ./reducer/**/* ]
   workflow_dispatch:
 jobs:
   build:
