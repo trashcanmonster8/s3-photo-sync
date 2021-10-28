@@ -22,3 +22,4 @@ jobs:
         with:
           name: photo-bucket
           template: iac/s3.yml
+          capabilities: CAPABILITY_NAMED_IAM
