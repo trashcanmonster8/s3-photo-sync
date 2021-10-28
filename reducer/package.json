@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf dist",
+    "clean": "rimraf ./helpers/*.js ./index.js",
     "format": "npm run lint:fix && npm run prettier:fix",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "package": "zip function.zip index.js ./helpers/*.js ./node_modules",
     "prettier": "prettier -c .",
     "prettier:fix": "prettier -w .",
     "test": "mocha"
