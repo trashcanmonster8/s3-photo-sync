@@ -1,4 +1,27 @@
+Parameters:
+  BucketName:
+    Type: String
+    Default: photo-sync-trashcanmonster8
 Resources:
+  PhotoBuckets:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt ReductionLambda.Arn
+      Tags:
+        - Key: Project
+          Value: photo-sync
+  InvokeReductionLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ReductionLambda
+      Principal: s3.amazonaws.com
+      SourceArn: !Sub 'arn:aws:s3:::${BucketName}'
+      SourceAccount: !Ref AWS::AccountId
   ReductionLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -13,9 +36,15 @@ Resources:
               - sts:AssumeRole
       Description: Role for reducer lambda
       RoleName: ReducerLambdaRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSLambdaExecute
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      Policies:
+        - PolicyName: createObjects
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:PutObject
+              Resource:  !Sub 'arn:aws:s3:::${BucketName}-reduced/*'
       Tags:
         - Key: Project
           Value: photo-sync
