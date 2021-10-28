@@ -32,8 +32,7 @@ jobs:
           aws-region: us-east-2
       - id: upload
         run: |
-          aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip
-          version=$(aws s3api put-object-tagging --bucket bucket-name --key code.zip --tagging 'TagSet=[{Key=Version,Value=Latest}]' --output text)
+          version=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text)
           echo "::set-output name=version::$version"
     outputs:
       version: ${{ steps.upload.outputs.version }}
