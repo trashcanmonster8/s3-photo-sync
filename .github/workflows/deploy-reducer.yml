@@ -34,6 +34,7 @@ jobs:
       - name: Deploy to AWS CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: photo-bucket
+          name: lambda-reducer
           template: iac/reducerLambda.yml
           capabilities: CAPABILITY_NAMED_IAM
+          no-fail-on-empty-changeset: 1
