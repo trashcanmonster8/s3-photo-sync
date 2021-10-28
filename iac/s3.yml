@@ -25,11 +25,13 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
-        Statement:
+        Statement: 
           - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumRoles
+            Principal: 
+              Service: 
+                - lambda.amazonaws.com
+            Action: 
+              - sts:AssumeRole
       Description: Role for reducer lambda
       RoleName: ReducerLambdaRole
       ManagedPolicyArns:
