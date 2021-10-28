@@ -35,8 +35,8 @@ jobs:
           aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip
           version=$(aws s3api put-object-tagging --bucket bucket-name --key code.zip --tagging 'TagSet=[{Key=Version,Value=Latest}]' --output text)
           echo "::set-output name=version::$version"
-   outputs:
-     version: ${{ steps.upload.outputs.version }}
+    outputs:
+      version: ${{ steps.upload.outputs.version }}
   deploy-lambda:
     runs-on: ubuntu-latest
     needs: [ upload-to-s3 ]
