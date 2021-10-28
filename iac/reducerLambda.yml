@@ -36,7 +36,7 @@ Resources:
               - sts:AssumeRole
       Description: Role for reducer lambda
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
       Policies:
         - PolicyName: createObjects
           PolicyDocument:
