@@ -1,0 +1,8 @@
+Resources:
+  LambdaCodeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: photo-sync-trashcanmonster8-lambda-code
+      Tags:
+        - Key: Project
+          Value: photo-sync

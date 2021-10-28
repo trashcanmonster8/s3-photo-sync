@@ -6,13 +6,6 @@ Resources:
       Tags:
         - Key: Project
           Value: photo-sync
-  LambdaCodeBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: photo-sync-trashcanmonster8-lambda-code
-      Tags:
-        - Key: Project
-          Value: photo-sync
   PhotoBucketsReduced:
     Type: AWS::S3::Bucket
     Properties:
@@ -20,34 +13,3 @@ Resources:
       Tags:
         - Key: Project
           Value: photo-sync
-  ReductionLambdaRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal: 
-              Service: 
-                - lambda.amazonaws.com
-            Action: 
-              - sts:AssumeRole
-      Description: Role for reducer lambda
-      RoleName: ReducerLambdaRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSLambdaExecute
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-      Tags:
-        - Key: Project
-          Value: photo-sync
-  ReductionLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      Code:
-        S3Bucket: photo-sync-trashcanmonster8-lambda-code
-        S3Key: function.zip
-      Description: Reduces image size for future viewing
-      FunctionName: reduceImage
-      Role: !GetAtt ReductionLambdaRole.Arn
-      Runtime: nodejs12.x
-      Handler: index.handler
