@@ -1,7 +1,7 @@
 name: Upload Reducer Code
 on:
   workflow_run:
-    workflows: [ "CD Infrastructure" ]
+    workflows: [ "Photo Buckets" ]
     branches: [ main ]
     types: [ completed ]
 jobs:
@@ -31,3 +31,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - run: aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip
+      - name: Deploy to AWS CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: photo-bucket
+          template: iac/reducerLambda.yml
+          capabilities: CAPABILITY_NAMED_IAM
