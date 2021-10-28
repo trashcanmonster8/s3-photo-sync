@@ -35,7 +35,8 @@ Resources:
             Action: 
               - sts:AssumeRole
       Description: Role for reducer lambda
-      RoleName: ReducerLambdaRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaBasicExecutionRole
       Policies:
         - PolicyName: createObjects
           PolicyDocument:
@@ -45,6 +46,7 @@ Resources:
               Action:
               - s3:PutObject
               Resource:  !Sub 'arn:aws:s3:::${BucketName}-reduced/*'
+      RoleName: ReducerLambdaRole
       Tags:
         - Key: Project
           Value: photo-sync
