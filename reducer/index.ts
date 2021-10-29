@@ -28,11 +28,6 @@ export const handler: Handler<S3Event, void[]> = async (
       })
       .then((response: PutObjectCommandOutput) => {
         console.log(`Put reduced object etag: ${response.ETag}`)
-      })
-      .catch((reason) => {
-        const error: Error = new Error(reason);
-        console.error(error.message)
-        throw error;
       });
   }));
 };
