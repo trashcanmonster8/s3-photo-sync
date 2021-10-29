@@ -34,7 +34,7 @@ jobs:
           aws-region: us-east-2
       - id: upload
         run: |
-          VERSION=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text)
+          export VERSION=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query VersionId --output text)
           echo "::debug::version is $VERSION"
           echo "::set-output name=version::$VERSION"
   deploy-lambda:
