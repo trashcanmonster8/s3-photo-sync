@@ -34,8 +34,7 @@ jobs:
           aws-region: us-east-2
       - id: upload
         run: |
-          export VERSION=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query VersionId --output text)
-          echo "::debug::version is $VERSION"
+          VERSION=$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query VersionId --output text)
           echo "::set-output name=version::$VERSION"
   deploy-lambda:
     runs-on: ubuntu-latest
@@ -52,5 +51,5 @@ jobs:
           name: lambda-reducer
           template: iac/reducerLambda.yml
           capabilities: CAPABILITY_NAMED_IAM
-          parameter-overrides: "Version=${{ needs.spin_up.outputs.version }}"
+          parameter-overrides: "Version=${{ needs.upload-to-s3.outputs.version }}"
           no-fail-on-empty-changeset: 1
