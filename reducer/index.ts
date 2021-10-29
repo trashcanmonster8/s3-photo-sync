@@ -17,7 +17,7 @@ export const handler: Handler<S3Event, void[]> = async (
     const client: S3Client = new S3Client({ region: record.awsRegion });
     return getImage(client, bucketName, key)
       .then((response: GetObjectOutput) => {
-        console.log(`Body is of type: ${typeof response.Body}`)
+        console.log(`Body: ${JSON.stringify(response.Body, null, 2)}`)
         console.log(`Received ${key} etag: ${response.ETag}`)
         return response;
       })
