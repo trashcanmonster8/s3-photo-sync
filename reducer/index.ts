@@ -17,7 +17,8 @@ export const handler: Handler<S3Event, void[]> = async (
     const client: S3Client = new S3Client({ region: record.awsRegion });
     return getImage(client, bucketName, key)
       .then((response: GetObjectOutput) => {
-        console.log(`Received object: ${JSON.stringify(response.Metadata)}`)
+        console.log(`Body is of type: ${typeof response.Body}`)
+        console.log(`Received ${key} etag: ${response.ETag}`)
         return response;
       })
       .then(parseResponse)
@@ -26,7 +27,7 @@ export const handler: Handler<S3Event, void[]> = async (
         return putImage(client, reducedBucketName, key, data);
       })
       .then((response: PutObjectCommandOutput) => {
-        console.log(`Put reduced object: ${JSON.stringify(response.$metadata)}`)
+        console.log(`Put reduced object etag: ${response.ETag}`)
       })
       .catch((reason) => {
         const error: Error = new Error(reason);
