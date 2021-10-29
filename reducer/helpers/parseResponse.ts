@@ -5,7 +5,7 @@ export const parseResponse = async (
   response: GetObjectOutput
 ): Promise<Buffer> => {
   if (response.Body instanceof Readable) {
-    return Buffer.from(response.Body.read());
+    return response.Body.read();
   } else if (response.Body instanceof ReadableStream) {
     return Buffer.from(await new Response(response.Body).arrayBuffer());
   } else if (response.Body instanceof Blob) {
