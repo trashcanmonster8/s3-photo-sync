@@ -5,10 +5,10 @@ import { parseResponse } from "./helpers/parseResponse";
 import { putImage } from "./helpers/putImage";
 import { reduceImage } from "./helpers/reduceImage";
 
-export const handler: Handler<S3Event, void> = async (
+export const handler: Handler<S3Event, void[]> = async (
   event: S3Event
-): Promise<void> => {
-  event.Records.forEach(async (record: S3EventRecord): Promise<void> => {
+): Promise<void[]> => {
+  return Promise.all(event.Records.map(async (record: S3EventRecord): Promise<void> => {
     const bucketName = record.s3.bucket.name;
     console.log(`Received event: ${record.eventName}`);
     const reducedBucketName = bucketName + "-reduced";
@@ -33,5 +33,5 @@ export const handler: Handler<S3Event, void> = async (
         console.error(error.message)
         throw error;
       });
-  });
+  }));
 };
