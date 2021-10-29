@@ -31,7 +31,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
       - id: upload
-        run: echo "::set-output name=version::$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text)"
+        # run: echo "::set-output name=version::$(aws s3api put-object --bucket photo-sync-trashcanmonster8-lambda-code --key function.zip --body function.zip --query 'VersionId' --output text)"
+        run: echo "::set-output name=version::test"
     outputs:
       version: ${{ steps.upload.outputs.version }}
   deploy-lambda:
