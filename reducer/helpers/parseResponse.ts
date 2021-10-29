@@ -3,9 +3,9 @@ import { Readable } from "stream";
 
 export const parseResponse = async (
   response: GetObjectOutput
-): Promise<Buffer> => {
+): Promise<Buffer | Readable> => {
   if (response.Body instanceof Readable) {
-    return response.Body.read();
+    return response.Body;
   } else if (response.Body instanceof ReadableStream) {
     return Buffer.from(await new Response(response.Body).arrayBuffer());
   } else if (response.Body instanceof Blob) {

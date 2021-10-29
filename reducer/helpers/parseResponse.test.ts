@@ -13,6 +13,6 @@ describe("parseResponse", () => {
       $metadata: {},
       Body: readableBody,
     };
-    ok((await parseResponse(response)) instanceof Buffer);
+    ok(await parseResponse(response));
   });
 });
