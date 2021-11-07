@@ -45,6 +45,8 @@ back.setMode("lockdown");
 
 describe("endToEnd", () => {
   it("compresses", async () => {
+    process.env['AWS_ACCESS_KEY_ID'] = 'test'
+    process.env['AWS_SECRET_ACCESS_KEY'] = 'test'
     const after: (scope: Scope) => void = (scope: Scope) => {
       scope.filteringPath(() => "/image.jpg");
     };
