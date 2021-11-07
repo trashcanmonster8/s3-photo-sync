@@ -1,8 +1,8 @@
 import { S3EventRecord, Context } from "aws-lambda";
 import { handler } from ".";
 import { back, BackContext, Definition, Scope } from "nock";
-import { ok } from "assert";
-import { PutObjectCommandOutput } from "@aws-sdk/client-s3";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const exampleEvent: S3EventRecord = {
   eventVersion: "2.0",
@@ -40,15 +40,31 @@ const exampleEvent: S3EventRecord = {
   },
 };
 
-back.fixtures = "./data";
+interface Nocking {
+  nockDone: () => void;
+  context: BackContext;
+}
+
+back.fixtures = join(__dirname, "data");
 back.setMode("lockdown");
 
 describe("endToEnd", () => {
-  it("compresses", async () => {
-    process.env['AWS_ACCESS_KEY_ID'] = 'test'
-    process.env['AWS_SECRET_ACCESS_KEY'] = 'test'
+  let nocking: Nocking;
+  let picturePath: string;
+  beforeEach(async () => {
+    if (back.currentMode !== "record") {
+      process.env["AWS_ACCESS_KEY_ID"] = "test";
+      process.env["AWS_SECRET_ACCESS_KEY"] = "test";
+    }
+    picturePath = join(__dirname, "data", "dumpsterFire.jpg");
+    const before: (def: Definition) => void = (def: Definition) => {
+      if (def.method == "GET") {
+        def.response = readFileSync(picturePath, { encoding: "hex" });
+      }
+    };
     const after: (scope: Scope) => void = (scope: Scope) => {
       scope.filteringPath(() => "/image.jpg");
+      scope.filteringRequestBody(/.+/g, "image");
     };
     const afterRecord: (defs: Definition[]) => Definition[] = (
       defs: Definition[]
@@ -56,33 +72,28 @@ describe("endToEnd", () => {
       return defs.map((def: Definition) => {
         def.path = "/image.jpg";
         if (def.method == "GET") {
-          def.response = undefined;
+          def.response = "image";
         } else if (def.method == "PUT") {
-          def.body = undefined;
+          def.body = "image";
         }
         return def;
       });
     };
-    const {
-      nockDone,
-      context,
-    }: {
-      nockDone: () => void;
-      context: BackContext;
-    } = await back("s3PutPhoto.json", { after, afterRecord });
-    const result: PutObjectCommandOutput[] | void = await handler(
+    nocking = await back("s3PutPhoto.json", { before, after, afterRecord });
+  });
+  afterEach(() => {
+    nocking.nockDone();
+  });
+  it("sends image to AWS", async () => {
+    await handler(
       { Records: [exampleEvent] },
       {} as Context,
-      (error?: string | Error | null, result?: PutObjectCommandOutput[]) => {
+      (error?: string | Error | null) => {
         if (error) {
           throw error;
         }
-
-        return result;
       }
     );
-    ok(result);
-    context.assertScopesFinished();
-    nockDone();
+    nocking.context.assertScopesFinished();
   });
 });
