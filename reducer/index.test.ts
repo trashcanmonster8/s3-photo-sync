@@ -3,6 +3,9 @@ import { handler } from ".";
 import { back, BackContext, Definition, Scope } from "nock";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { SinonSpy, spy } from "sinon";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ok } from "assert/strict";
 
 const exampleEvent: S3EventRecord = {
   eventVersion: "2.0",
@@ -51,6 +54,17 @@ back.setMode("lockdown");
 describe("endToEnd", () => {
   let nocking: Nocking;
   let picturePath: string;
+  const execute: () => Promise<void> = async () => {
+    await handler(
+      { Records: [exampleEvent] },
+      {} as Context,
+      (error?: string | Error | null) => {
+        if (error) {
+          throw error;
+        }
+      }
+    );
+  }
   beforeEach(async () => {
     if (back.currentMode !== "record") {
       process.env["AWS_ACCESS_KEY_ID"] = "test";
@@ -85,15 +99,16 @@ describe("endToEnd", () => {
     nocking.nockDone();
   });
   it("sends image to AWS", async () => {
-    await handler(
-      { Records: [exampleEvent] },
-      {} as Context,
-      (error?: string | Error | null) => {
-        if (error) {
-          throw error;
-        }
-      }
-    );
+    await execute();
     nocking.context.assertScopesFinished();
+  });
+  it("compresses image", async () => {
+    const sendSpy: SinonSpy = spy(S3Client.prototype, 'send');
+    await execute();
+    const command: PutObjectCommand = sendSpy.secondCall.firstArg
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newImageSize: number = Buffer.from(<any>command.input.Body).byteLength
+    const imageSize: number = readFileSync(picturePath).byteLength;
+    ok(imageSize > newImageSize);
   });
 });
