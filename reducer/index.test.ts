@@ -3,10 +3,9 @@ import { handler } from ".";
 import { back, BackContext, Definition, Scope } from "nock";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { restore, SinonSpy, SinonStub, spy, stub } from "sinon";
-import { ObjectNotInActiveTierError, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { SinonSpy, spy } from "sinon";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { ok, rejects } from "assert";
-import Jimp from "jimp";
 
 const exampleEvent: S3EventRecord = {
   eventVersion: "2.0",
@@ -53,6 +52,7 @@ back.fixtures = join(__dirname, "data");
 back.setMode("lockdown");
 
 describe("handler", () => {
+  let nocking: Nocking;
   let picturePath: string;
   const execute: () => Promise<void> = async () => {
     await handler(
@@ -69,14 +69,13 @@ describe("handler", () => {
     picturePath = join(__dirname, "data", "dumpsterFire.jpg");
   })
   describe('happy path', () => {
-    let nocking: Nocking;
     beforeEach(async () => {
       if (back.currentMode !== "record") {
         process.env["AWS_ACCESS_KEY_ID"] = "test";
         process.env["AWS_SECRET_ACCESS_KEY"] = "test";
       }
       const before: (def: Definition) => void = (def: Definition) => {
-        if (def.method == "GET") {
+        if (def.method === "GET") {
           def.response = readFileSync(picturePath, { encoding: "hex" });
         }
       };
@@ -89,9 +88,9 @@ describe("handler", () => {
       ) => {
         return defs.map((def: Definition) => {
           def.path = "/image.jpg";
-          if (def.method == "GET") {
+          if (def.method === "GET") {
             def.response = "image";
-          } else if (def.method == "PUT") {
+          } else if (def.method === "PUT") {
             def.body = "image";
           }
           return def;
@@ -116,28 +115,32 @@ describe("handler", () => {
       ok(imageSize > newImageSize);
     });
   })
-  describe('error scenarios', () => {
-    let jimpStub: SinonStub;
-    before(() => {
-      jimpStub = stub(Jimp, 'read');
+  if (back.currentMode === 'lockdown') {
+    describe('error scenarios', () => {
+      before(async () => {
+        process.env["AWS_ACCESS_KEY_ID"] = "test";
+        process.env["AWS_SECRET_ACCESS_KEY"] = "test";
+        const before: (def: Definition) => void = (def: Definition) => {
+          if (def.method === "GET" && def.status === 200) {
+            def.response = readFileSync(picturePath, { encoding: "hex" });
+          }
+        };
+        const after: (scope: Scope) => void = (scope: Scope) => {
+          scope.filteringPath(() => "/image.jpg");
+          scope.filteringRequestBody(/.+/g, "image");
+        };
+        nocking = await back("s3PutPhotoError.json", { before, after });
+      });
+      after(() => {
+        nocking.nockDone();
+        nocking.context.assertScopesFinished();
+      })
+      it('throws when GET fails', async () => {
+        await rejects(execute());
+      });
+      it('throws when PUT fails', async () => {
+        await rejects(execute());
+      });
     });
-    afterEach(() => {
-      restore();
-    })
-    it('throws when GET fails', async () => {
-      jimpStub.rejects(TypeError.name);
-      await rejects(execute, new TypeError());
-    });
-    it('throws when PUT fails', async () => {
-      jimpStub.resolves(await Jimp.read(picturePath));
-      const error: ObjectNotInActiveTierError = {
-        name: 'ObjectNotInActiveTierError',
-        '$fault': 'client',
-        '$metadata': {}
-      };
-      const sendStub: SinonStub = stub(S3Client.prototype, 'send');
-      sendStub.rejects(error.name);
-      await rejects(execute, error.name);
-    });
-  })
+  }
 });
