@@ -64,11 +64,11 @@ describe("handler", () => {
         }
       }
     );
-  }
+  };
   before(() => {
     picturePath = join(__dirname, "data", "dumpsterFire.jpg");
-  })
-  describe('happy path', () => {
+  });
+  describe("happy path", () => {
     beforeEach(async () => {
       if (back.currentMode !== "record") {
         process.env["AWS_ACCESS_KEY_ID"] = "test";
@@ -106,17 +106,19 @@ describe("handler", () => {
       nocking.context.assertScopesFinished();
     });
     it("compresses image", async () => {
-      const sendSpy: SinonSpy = spy(S3Client.prototype, 'send');
+      const sendSpy: SinonSpy = spy(S3Client.prototype, "send");
       await execute();
-      const command: PutObjectCommand = sendSpy.secondCall.firstArg
+      const command: PutObjectCommand = sendSpy.secondCall.firstArg;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newImageSize: number = Buffer.from(<any>command.input.Body).byteLength
+      const newImageSize: number = Buffer.from(
+        <any>command.input.Body
+      ).byteLength;
       const imageSize: number = readFileSync(picturePath).byteLength;
       ok(imageSize > newImageSize);
     });
-  })
-  if (back.currentMode === 'lockdown') {
-    describe('error scenarios', () => {
+  });
+  if (back.currentMode === "lockdown") {
+    describe("error scenarios", () => {
       before(async () => {
         process.env["AWS_ACCESS_KEY_ID"] = "test";
         process.env["AWS_SECRET_ACCESS_KEY"] = "test";
@@ -134,11 +136,11 @@ describe("handler", () => {
       after(() => {
         nocking.nockDone();
         nocking.context.assertScopesFinished();
-      })
-      it('throws when GET fails', async () => {
+      });
+      it("throws when GET fails", async () => {
         await rejects(execute());
       });
-      it('throws when PUT fails', async () => {
+      it("throws when PUT fails", async () => {
         await rejects(execute());
       });
     });
