@@ -6,14 +6,6 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Handler, S3Event, S3EventRecord } from "aws-lambda";
-
-AWS.config.update({
-  region: process.env.AWS_DEFAULT_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-  }
-});
 import Jimp from "jimp";
 
 export const handler: Handler<S3Event, void[]> = async (
