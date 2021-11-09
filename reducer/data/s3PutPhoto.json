@@ -1,0 +1,56 @@
+[
+  {
+    "scope": "https://photo-sync-trashcanmonster8.s3.us-east-2.amazonaws.com:443",
+    "method": "GET",
+    "path": "/image.jpg",
+    "body": "",
+    "status": 200,
+    "response": "image",
+    "rawHeaders": [
+      "x-amz-id-2",
+      "VBao5buJymE33wGNlxZNUkwEg8Oz0T7C2fHA1UgQORHmiYOypzcAk8zfUGqT4alk7xrNIcwISXM=",
+      "x-amz-request-id",
+      "CHGWJBR1F566FEFT",
+      "Date",
+      "Sun, 07 Nov 2021 13:56:14 GMT",
+      "Last-Modified",
+      "Fri, 29 Oct 2021 18:57:10 GMT",
+      "ETag",
+      "\"55e785e790e83a3fe4cec558a5070c1c\"",
+      "Accept-Ranges",
+      "bytes",
+      "Content-Type",
+      "image/png",
+      "Server",
+      "AmazonS3",
+      "Content-Length",
+      "141191",
+      "Connection",
+      "close"
+    ],
+    "responseIsBinary": true
+  },
+  {
+    "scope": "https://photo-sync-trashcanmonster8-reduced.s3.us-east-2.amazonaws.com:443",
+    "method": "PUT",
+    "path": "/image.jpg",
+    "body": "image",
+    "status": 200,
+    "response": "",
+    "rawHeaders": [
+      "x-amz-id-2",
+      "6EcjqibPU79a/hvn+OORyhTFrlRBrpxQO9rp+TWWjQSMY8FBARnDKbEN0YHaa64+V1MZaXTBMMs=",
+      "x-amz-request-id",
+      "CHGKC0GJ2JGM7ZP1",
+      "Date",
+      "Sun, 07 Nov 2021 13:56:14 GMT",
+      "ETag",
+      "\"c7e7c25d4cb1e57e7da4be2c1ffbdf79\"",
+      "Server",
+      "AmazonS3",
+      "Content-Length",
+      "0"
+    ],
+    "responseIsBinary": false
+  }
+]
