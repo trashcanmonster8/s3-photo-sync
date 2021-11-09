@@ -40,6 +40,14 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
       Policies:
+        - PolicyName: getObjects
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub 'arn:aws:s3:::${BucketName}/*'
         - PolicyName: createObjects
           PolicyDocument:
             Version: '2012-10-17'
@@ -47,7 +55,7 @@ Resources:
             - Effect: Allow
               Action:
               - s3:PutObject
-              Resource:  !Sub 'arn:aws:s3:::${BucketName}-reduced/*'
+              Resource: !Sub 'arn:aws:s3:::${BucketName}-reduced/*'
       RoleName: ReducerLambdaRole
       Tags:
         - Key: Project

@@ -29,7 +29,7 @@ export const handler: Handler<S3Event, void[]> = async (
       const url: string = await getSignedUrl(client, command, {
         expiresIn: 60,
       });
-      console.log('Created signed url');
+      console.log('Created signed url %s', new URL(url).host);
       let image: Jimp;
       try {
         image = await Jimp.read(url);
