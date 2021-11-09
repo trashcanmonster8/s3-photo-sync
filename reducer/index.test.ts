@@ -3,9 +3,10 @@ import { handler } from ".";
 import { back, BackContext, Definition, Scope } from "nock";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { SinonSpy, spy } from "sinon";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { ok } from "assert";
+import { restore, SinonSpy, SinonStub, spy, stub } from "sinon";
+import { ObjectNotInActiveTierError, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ok, rejects } from "assert";
+import Jimp from "jimp";
 
 const exampleEvent: S3EventRecord = {
   eventVersion: "2.0",
@@ -35,7 +36,7 @@ const exampleEvent: S3EventRecord = {
       arn: "arn:aws:s3:::example-bucket",
     },
     object: {
-      key: "roomsHolidayValley.png",
+      key: "dumpsterFire.png",
       size: 1024,
       eTag: "0123456789abcdef0123456789abcdef",
       sequencer: "0A1B2C3D4E5F678901",
@@ -51,8 +52,7 @@ interface Nocking {
 back.fixtures = join(__dirname, "data");
 back.setMode("lockdown");
 
-describe("endToEnd", () => {
-  let nocking: Nocking;
+describe("handler", () => {
   let picturePath: string;
   const execute: () => Promise<void> = async () => {
     await handler(
@@ -65,50 +65,79 @@ describe("endToEnd", () => {
       }
     );
   }
-  beforeEach(async () => {
-    if (back.currentMode !== "record") {
-      process.env["AWS_ACCESS_KEY_ID"] = "test";
-      process.env["AWS_SECRET_ACCESS_KEY"] = "test";
-    }
+  before(() => {
     picturePath = join(__dirname, "data", "dumpsterFire.jpg");
-    const before: (def: Definition) => void = (def: Definition) => {
-      if (def.method == "GET") {
-        def.response = readFileSync(picturePath, { encoding: "hex" });
+  })
+  describe('happy path', () => {
+    let nocking: Nocking;
+    beforeEach(async () => {
+      if (back.currentMode !== "record") {
+        process.env["AWS_ACCESS_KEY_ID"] = "test";
+        process.env["AWS_SECRET_ACCESS_KEY"] = "test";
       }
-    };
-    const after: (scope: Scope) => void = (scope: Scope) => {
-      scope.filteringPath(() => "/image.jpg");
-      scope.filteringRequestBody(/.+/g, "image");
-    };
-    const afterRecord: (defs: Definition[]) => Definition[] = (
-      defs: Definition[]
-    ) => {
-      return defs.map((def: Definition) => {
-        def.path = "/image.jpg";
+      const before: (def: Definition) => void = (def: Definition) => {
         if (def.method == "GET") {
-          def.response = "image";
-        } else if (def.method == "PUT") {
-          def.body = "image";
+          def.response = readFileSync(picturePath, { encoding: "hex" });
         }
-        return def;
-      });
-    };
-    nocking = await back("s3PutPhoto.json", { before, after, afterRecord });
-  });
-  afterEach(() => {
-    nocking.nockDone();
-  });
-  it("sends image to AWS", async () => {
-    await execute();
-    nocking.context.assertScopesFinished();
-  });
-  it("compresses image", async () => {
-    const sendSpy: SinonSpy = spy(S3Client.prototype, 'send');
-    await execute();
-    const command: PutObjectCommand = sendSpy.secondCall.firstArg
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const newImageSize: number = Buffer.from(<any>command.input.Body).byteLength
-    const imageSize: number = readFileSync(picturePath).byteLength;
-    ok(imageSize > newImageSize);
-  });
+      };
+      const after: (scope: Scope) => void = (scope: Scope) => {
+        scope.filteringPath(() => "/image.jpg");
+        scope.filteringRequestBody(/.+/g, "image");
+      };
+      const afterRecord: (defs: Definition[]) => Definition[] = (
+        defs: Definition[]
+      ) => {
+        return defs.map((def: Definition) => {
+          def.path = "/image.jpg";
+          if (def.method == "GET") {
+            def.response = "image";
+          } else if (def.method == "PUT") {
+            def.body = "image";
+          }
+          return def;
+        });
+      };
+      nocking = await back("s3PutPhoto.json", { before, after, afterRecord });
+    });
+    afterEach(() => {
+      nocking.nockDone();
+    });
+    it("sends image to AWS", async () => {
+      await execute();
+      nocking.context.assertScopesFinished();
+    });
+    it("compresses image", async () => {
+      const sendSpy: SinonSpy = spy(S3Client.prototype, 'send');
+      await execute();
+      const command: PutObjectCommand = sendSpy.secondCall.firstArg
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newImageSize: number = Buffer.from(<any>command.input.Body).byteLength
+      const imageSize: number = readFileSync(picturePath).byteLength;
+      ok(imageSize > newImageSize);
+    });
+  })
+  describe('error scenarios', () => {
+    let jimpStub: SinonStub;
+    before(() => {
+      jimpStub = stub(Jimp, 'read');
+    });
+    afterEach(() => {
+      restore();
+    })
+    it('throws when GET fails', async () => {
+      jimpStub.rejects(TypeError.name);
+      await rejects(execute, new TypeError());
+    });
+    it('throws when PUT fails', async () => {
+      jimpStub.resolves(await Jimp.read(picturePath));
+      const error: ObjectNotInActiveTierError = {
+        name: 'ObjectNotInActiveTierError',
+        '$fault': 'client',
+        '$metadata': {}
+      };
+      const sendStub: SinonStub = stub(S3Client.prototype, 'send');
+      sendStub.rejects(error.name);
+      await rejects(execute, error.name);
+    });
+  })
 });
