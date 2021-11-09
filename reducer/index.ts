@@ -29,13 +29,27 @@ export const handler: Handler<S3Event, void[]> = async (
       const url: string = await getSignedUrl(client, command, {
         expiresIn: 60,
       });
-      const image: Jimp = await Jimp.read(url);
+      console.log('Created signed url');
+      let image: Jimp;
+      try {
+        image = await Jimp.read(url);
+        console.log('Get image with signed url');
+      } catch (e) {
+        console.error('Get image failed - %s', e);
+        throw e;
+      }
       const putImage: PutObjectCommandInput = {
         Bucket: reducedBucketName,
         Key: key,
         Body: await image.quality(0.25).getBufferAsync(image.getMIME()),
       };
-      await client.send(new PutObjectCommand(putImage));
+      try {
+        await client.send(new PutObjectCommand(putImage));
+        console.log('Upload image to %s/%s', putImage.Bucket, putImage.Key);
+      } catch (e) {
+        console.error('Upload failed - %s', e);
+        throw e;
+      }
     })
   );
 };
