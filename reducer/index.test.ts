@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { SinonSpy, spy } from "sinon";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { ok } from "assert/strict";
+import { ok } from "assert";
 
 const exampleEvent: S3EventRecord = {
   eventVersion: "2.0",
